@@ -1,54 +1,101 @@
-# React + TypeScript + Vite
+# Frontend — Boards & Tasks (React + Vite + Tailwind)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Web client for a collaborative **boards & tasks** app (Trello-like).
+Tech: **React 18**, **TypeScript**, **Vite**, **TailwindCSS**.
 
-Currently, two official plugins are available:
+> Backend defaults: API at `http://localhost:4000`, Swagger at `/docs`.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## ✅ Requirements
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+* **Node.js 18+** and **npm**
+* The backend running locally or accessible via URL
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+---
+
+## 1) Install
+
+```bash
+cd frontend
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 2) Configure environment
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+Create **`.env.local`** in `frontend/`:
+
+```env
+# Base URL of the backend API (include protocol and port)
+VITE_API="http://localhost:4000"
+```
+
+The app reads this in `src/api.ts` and sends requests with `credentials: 'include'` so the browser will include the auth cookie.
+
+---
+
+## 3) Run in development
+
+```bash
+npm run dev
+```
+
+Vite will print the URL (typically `http://localhost:5173`).
+
+---
+
+## 4) Build & preview
+
+```bash
+npm run build      # outputs production assets to dist/
+npm run preview    # serves the built app (usually http://localhost:4173)
+```
+
+Deploy the contents of `dist/` to any static host. Remember to set `VITE_API` in your hosting/build environment to point at your API.
+
+---
+
+## 📂 Project structure (high level)
+
+```
+src/
+├─ pages/          # Boards, BoardDetail, Preferences, Login, Register
+├─ components/     # TaskItem, TaskModal, ShareModal, Navbar, etc.
+├─ hooks/          # useDarkMode, useToast, useViewMode
+├─ api.ts          # HTTP client (uses VITE_API, credentials:'include')
+├─ auth.tsx        # client-side auth helpers
+├─ App.tsx / main.tsx
+└─ index.css / App.css
+```
+
+Tailwind is configured in `tailwind.config.js` and included via `index.css`.
+
+---
+
+## 🔐 Auth flow (expected)
+
+1. **Register** or **Login** via the backend.
+2. Backend sets an HTTP-only auth cookie (`token`).
+3. Subsequent requests from the frontend include credentials; protected views use that session.
+
+---
+
+## 🧩 Troubleshooting
+
+* **CORS / cookie not sent:** the backend must allow your frontend origin and `credentials: true`. Default dev origin is `http://localhost:5173`.
+* **401 Unauthorized:** log in first; ensure `VITE_API` matches the API URL and that the backend is running.
+* **Env changes not applied:** restart `npm run dev` after editing `.env.local`.
+* **Styles not applied:** ensure `@tailwind base; @tailwind components; @tailwind utilities;` are in `src/index.css`.
+
+---
+
+## 📝 NPM scripts
+
+```bash
+npm run dev       # start Vite dev server
+npm run build     # production build to dist/
+npm run preview   # preview built app
+npm run lint      # (if configured) lint the project
 ```

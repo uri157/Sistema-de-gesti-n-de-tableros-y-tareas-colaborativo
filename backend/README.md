@@ -3,15 +3,15 @@
 This backend powers a collaborative boards & tasks app (Trello-like).
 Tech: **Node.js**, **TypeScript**, **Express**, **Prisma**, **PostgreSQL**.
 
-## ✅ Requisitos
+## ✅ Requirements
 
-* **Node.js 18+** y **npm**
-* **Docker** (para levantar PostgreSQL local)
-* **OpenSSL** (para generar el JWT secret; opcional pero recomendado)
+* **Node.js 18+** and **npm**
+* **Docker** (to run PostgreSQL locally)
+* **OpenSSL** (to generate the JWT secret; optional but recommended)
 
 ---
 
-## 1) Clonar e instalar
+## 1) Clone & install
 
 ```bash
 cd backend
@@ -20,9 +20,9 @@ npm i
 
 ---
 
-## 2) Base de datos local (Docker)
+## 2) Local database (Docker)
 
-Levanta un PostgreSQL local en el puerto **5432**:
+Launch a local PostgreSQL instance on port **5432**:
 
 ```bash
 docker run -d --name pg-boards \
@@ -33,20 +33,20 @@ docker run -d --name pg-boards \
   postgres:16
 ```
 
-> Para parar/iniciar: `docker stop pg-boards` / `docker start pg-boards`
-> Para logs: `docker logs -f pg-boards`
+> To stop/start: `docker stop pg-boards` / `docker start pg-boards`
+> Logs: `docker logs -f pg-boards`
 
 ---
 
-## 3) Variables de entorno
+## 3) Environment variables
 
-Crea un archivo **`.env`** en `backend/` (junto al `package.json`) con:
+Create a **`.env`** file in `backend/` (next to `package.json`) with:
 
 ```env
-# PostgreSQL local
+# Local PostgreSQL
 DATABASE_URL="postgresql://boards:boards@localhost:5432/boards?schema=public&connect_timeout=10"
 
-# JWT (genera uno seguro)
+# JWT (generate a strong one)
 # Linux/macOS:
 #   openssl rand -base64 32
 # Windows PowerShell:
@@ -54,60 +54,59 @@ DATABASE_URL="postgresql://boards:boards@localhost:5432/boards?schema=public&con
 JWT_SECRET="paste-your-32+char-secret-here"
 ```
 
-> En producción (Neon u otro gestionado), usa `sslmode=require` en la URL y tus credenciales reales:
+> In production (Neon or another managed service), use `sslmode=require` in the URL and your real credentials:
 > `postgresql://user:pass@host/db?schema=public&sslmode=require&connect_timeout=10`
 
 ---
 
-## 4) Prisma: generar/migrar
+## 4) Prisma: generate/migrate
 
 ```bash
-# Crea/actualiza el esquema en la DB y genera el cliente
+# Create/update the DB schema and generate the client
 npx prisma migrate dev --name init
 
-# (opcional) abrir Prisma Studio para ver tablas y datos
+# (optional) open Prisma Studio to browse tables and data
 npx prisma studio
 ```
 
 ---
 
-## 5) Ejecutar el servidor
+## 5) Run the server
 
 ```bash
-# desarrollo (hot reload; si existe el script)
+# development (hot reload; if the script exists)
 npm run dev
 
-# alternativa si el repo usa build+start:
+# alternative if the repo uses build+start:
 # npm run build && npm start
 ```
 
-El puerto se define en el código (por defecto suele ser **3000**).
-Revisa `src/server.ts` o `src/api.ts` si necesitas confirmar.
+The port is defined in code (default is usually **3000**).
+Check `src/server.ts` or `src/api.ts` if you need to confirm.
 
 ---
 
-## 6) Probar la API
+## 6) Test the API
 
-* **Swagger/OpenAPI** (según configuración):
+* **Swagger/OpenAPI** (depending on configuration):
 
-  * `http://localhost:3000/docs` **o** `http://localhost:3000/swagger`
-* Si el frontend corre en Vite (5173), asegúrate de que el front apunte a la URL del backend (por ej. `VITE_API_URL=http://localhost:3000`).
+  * `http://localhost:3000/docs` **or** `http://localhost:3000/swagger`
+* If the frontend runs on Vite (5173), make sure it points to the backend URL (e.g., `VITE_API_URL=http://localhost:3000`).
 
 ---
 
 ## 🧩 Troubleshooting
 
-* **P1001 / “Can’t reach database”**: verifica que el contenedor `pg-boards` esté arriba (`docker ps`), puerto 5432 libre y `DATABASE_URL` correcta.
-* **Falla JWT**: define `JWT_SECRET` en `.env` (32+ chars).
-* **CORS desde el front**: si hay error de CORS, revisa el middleware en `src/server.ts` y agrega el origen `http://localhost:5173`.
-* **Migraciones en producción**: usa `npx prisma migrate deploy` en CI/CD (no `migrate dev`).
-* **Pool de conexiones (opcional)**: en servicios gestionados considera pgBouncer.
+* **P1001 / “Can’t reach database”**: ensure the `pg-boards` container is running (`docker ps`), port 5432 is free, and `DATABASE_URL` is correct.
+* **JWT failure**: set `JWT_SECRET` in `.env` (32+ chars).
+* **CORS from the frontend**: if you see CORS errors, check the middleware in `src/server.ts` and add the origin `http://localhost:5173`.
+* **Prod migrations**: use `npx prisma migrate deploy` in CI/CD (not `migrate dev`).
+* **Connection pooling (optional)**: consider pgBouncer for managed services.
 
 ---
 
-## 🗃️ Notas de despliegue (opcional)
+## 🗃️ Deployment notes (optional)
 
-* **Producción (Neon/Supabase/RDS)**:
+* **Production (Neon/Supabase/RDS)**:
   `DATABASE_URL="postgresql://user:pass@host/db?schema=public&sslmode=require&connect_timeout=10"`
-* **Shadow DB** (algunos proveedores): si `migrate dev` lo requiere, añade `SHADOW_DATABASE_URL` en `.env`.
-
+* **Shadow DB** (some providers): if `migrate dev` requires it, add `SHADOW_DATABASE_URL` in `.env`.
